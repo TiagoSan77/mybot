@@ -12,6 +12,10 @@ node_modules/
 .wwebjs_cache/
 **/.wwebjs_cache/
 
+# QR Code files (temporary)
+qr-*.txt
+**/qr-*.txt
+
 # Build outputs
 dist/
 **/dist/

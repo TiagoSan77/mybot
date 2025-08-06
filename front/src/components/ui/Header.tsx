@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, Plus, RefreshCw, Wifi, WifiOff, QrCode } from 'lucide-react';
+import { MessageCircle, Plus, RefreshCw, Wifi, WifiOff, QrCode, Send } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import whatsappAPI from '../../services/api';
 
 interface HeaderProps {
   onCreateSession: () => void;
+  onSendMessage: () => void;
   onRefresh: () => void;
 }
 
-export default function Header({ onCreateSession, onRefresh }: HeaderProps) {
+export default function Header({ onCreateSession, onSendMessage, onRefresh }: HeaderProps) {
   const [apiStatus, setApiStatus] = useState<'connected' | 'disconnected' | 'loading'>('loading');
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -97,6 +98,15 @@ export default function Header({ onCreateSession, onRefresh }: HeaderProps) {
             >
               <RefreshCw className="w-4 h-4" />
               <span className="hidden sm:inline">Atualizar</span>
+            </button>
+            
+            <button
+              onClick={onSendMessage}
+              className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors border border-blue-200"
+              title="Enviar mensagem"
+            >
+              <Send className="w-4 h-4" />
+              <span className="hidden sm:inline">Enviar Mensagem</span>
             </button>
             
             <button

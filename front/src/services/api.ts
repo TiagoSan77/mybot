@@ -4,7 +4,10 @@ import type {
   SessionsResponse, 
   QRResponse, 
   CreateSessionRequest, 
-  CreateSessionResponse 
+  CreateSessionResponse,
+  SendMessageRequest,
+  SendMessageResponse,
+  SessionInfoResponse
 } from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -135,6 +138,20 @@ export const whatsappAPI = {
     const response = await api.get(`/sessions/${sessionId}/qr/image`, {
       responseType: 'blob'
     });
+    return response.data;
+  },
+
+  // === MENSAGENS ===
+
+  // Enviar mensagem através de uma sessão
+  async sendMessage(data: SendMessageRequest): Promise<SendMessageResponse> {
+    const response = await api.post('/messages/send', data);
+    return response.data;
+  },
+
+  // Obter informações de uma sessão para envio
+  async getSessionInfo(sessionId: string): Promise<SessionInfoResponse> {
+    const response = await api.get(`/messages/session/${sessionId}`);
     return response.data;
   }
 };

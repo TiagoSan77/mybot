@@ -33,6 +33,46 @@ export interface CreateSessionResponse {
   status: string;
 }
 
+// === MENSAGENS ===
+
+export interface SendMessageRequest {
+  sessionId: string;
+  phoneNumber: string;
+  message: string;
+}
+
+export interface SendMessageResponse {
+  success: boolean;
+  message: string;
+  data: {
+    sessionId: string;
+    phoneNumber: string;
+    messageLength: number;
+    sentAt: string;
+    sentBy: string;
+    messageId: string;
+  };
+}
+
+export interface SessionInfoResponse {
+  session: {
+    id: string;
+    name: string;
+    createdAt?: string;
+  };
+  status: {
+    status: 'waiting_qr' | 'connected' | 'disconnected';
+    isActive: boolean;
+    hasQRCode: boolean;
+  };
+  canSendMessages: boolean;
+  instructions: {
+    ready?: string | null;
+    qrPending?: string | null;
+    disconnected?: string | null;
+  };
+}
+
 export interface ApiError {
   message: string;
   error?: string;

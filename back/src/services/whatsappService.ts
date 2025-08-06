@@ -183,6 +183,58 @@ class WhatsAppService {
 
         return { status, isActive, hasQRCode };
     }
+
+    public async sendMessage(sessionId: string, phoneNumber: string, message: string): Promise<any> {
+        const client = this.activeClients.get(sessionId);
+        
+        if (!client) {
+            throw new Error(`Sessão '${sessionId}' não está ativa`);
+        }
+
+        // Verificar se o cliente está pronto
+        const state = await client.getState();
+        if (state !== 'CONNECTED') {
+            throw new Error(`Sessão '${sessionId}' não está conectada. Estado atual: ${state}`);
+        }
+
+        // Formatar número de telefone (garantir que está no formato correto)
+        let formattedNumber = phoneNumber.replace(/\D/g, ''); // Remove tudo que não é dígito
+        
+        // Se não começar com código do país, assumir Brasil (55)
+        if (!formattedNumber.startsWith('55') && formattedNumber.length === 11) {
+            formattedNumber = '55' + formattedNumber;
+        }
+        
+        // Adicionar @c.us se não estiver presente
+        const chatId = formattedNumber.includes('@') ? formattedNumber : `${formattedNumber}@c.us`;
+
+        console.log(`📤 Enviando mensagem via sessão '${sessionId}' para '${chatId}': ${message.substring(0, 50)}...`);
+
+        try {
+            // Verificar se o número é válido
+            const isValidNumber = await client.isRegisteredUser(chatId);
+            if (!isValidNumber) {
+                throw new Error(`Número '${phoneNumber}' não está registrado no WhatsApp`);
+            }
+
+            // Enviar mensagem
+            const sentMessage = await client.sendMessage(chatId, message);
+            
+            console.log(`✅ Mensagem enviada com sucesso - ID: ${sentMessage.id._serialized}`);
+            
+            return {
+                id: sentMessage.id._serialized,
+                chatId: sentMessage.to,
+                message: sentMessage.body,
+                timestamp: sentMessage.timestamp,
+                ack: sentMessage.ack
+            };
+
+        } catch (error: any) {
+            console.error(`❌ Erro ao enviar mensagem via sessão '${sessionId}':`, error);
+            throw new Error(`Falha ao enviar mensagem: ${error.message}`);
+        }
+    }
 }
 
 export default WhatsAppService;

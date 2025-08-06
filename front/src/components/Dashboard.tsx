@@ -7,15 +7,19 @@ import Header from "./ui/Header";
 import SessionList from "./ui/SessionList";
 import CreateSessionModal from "./ui/CreateSessionModal";
 import QRCodeModal from "./ui/QRCodeModal";
+import SendMessageModal from "./ui/SendMessageModal";
+import type { Session, SendMessageResponse } from '../types/api';
 
 export default function Dashboard() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isSendMessageModalOpen, setIsSendMessageModalOpen] = useState(false);
     const [qrModal, setQrModal] = useState<{isOpen: boolean, sessionId: string, sessionName: string}>({
         isOpen: false,
         sessionId: '',
         sessionName: ''
     });
     const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [userSessions, setUserSessions] = useState<Session[]>([]);
     const navigate = useNavigate();
     const { user, logout, getIdToken } = useAuth();
 
@@ -30,11 +34,38 @@ export default function Dashboard() {
         setupAuthToken();
     }, [user, getIdToken]);
 
+    // Carregar sessões do usuário
+    useEffect(() => {
+        const loadSessions = async () => {
+            try {
+                const response = await whatsappAPI.getSessions();
+                setUserSessions(response.sessions);
+            } catch (error) {
+                console.error('Erro ao carregar sessões:', error);
+            }
+        };
+
+        if (user) {
+            loadSessions();
+        }
+    }, [user, refreshTrigger]);
+
     const handleCreateSession = () => {
         setIsCreateModalOpen(true);
     };
 
+    const handleSendMessage = () => {
+        setIsSendMessageModalOpen(true);
+    };
+
     const handleSessionCreated = () => {
+        setRefreshTrigger(prev => prev + 1);
+    };
+
+    const handleMessageSent = (result: SendMessageResponse) => {
+        console.log('Mensagem enviada:', result);
+        // Opcional: mostrar notificação de sucesso
+        // Refresh das sessões para atualizar status
         setRefreshTrigger(prev => prev + 1);
     };
 
@@ -69,6 +100,7 @@ export default function Dashboard() {
         <div className="min-h-screen bg-gray-50">
             <Header 
                 onCreateSession={handleCreateSession}
+                onSendMessage={handleSendMessage}
                 onRefresh={handleRefresh}
             />
             
@@ -116,6 +148,13 @@ export default function Dashboard() {
                 onClose={() => setQrModal(prev => ({ ...prev, isOpen: false }))}
                 sessionId={qrModal.sessionId}
                 sessionName={qrModal.sessionName}
+            />
+
+            <SendMessageModal
+                isOpen={isSendMessageModalOpen}
+                onClose={() => setIsSendMessageModalOpen(false)}
+                userSessions={userSessions}
+                onMessageSent={handleMessageSent}
             />
         </div>
     );
