@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, Plus, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MessageCircle, Plus, RefreshCw, Wifi, WifiOff, QrCode } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import whatsappAPI from '../../services/api';
 
 interface HeaderProps {
@@ -9,6 +11,8 @@ interface HeaderProps {
 
 export default function Header({ onCreateSession, onRefresh }: HeaderProps) {
   const [apiStatus, setApiStatus] = useState<'connected' | 'disconnected' | 'loading'>('loading');
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const checkAPIStatus = async () => {
     try {
@@ -59,6 +63,33 @@ export default function Header({ onCreateSession, onRefresh }: HeaderProps) {
           </div>
 
           <div className="flex items-center gap-3">
+            {user && (
+              <div className="flex items-center gap-3 mr-4">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">
+                    {user.displayName || user.email}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Suas sessões WhatsApp
+                  </p>
+                </div>
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 font-semibold text-sm">
+                    {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            <button
+              onClick={() => navigate('/qr')}
+              className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+              title="Ver QR Codes"
+            >
+              <QrCode className="w-4 h-4" />
+              <span className="hidden sm:inline">QR Codes</span>
+            </button>
+            
             <button
               onClick={onRefresh}
               className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"

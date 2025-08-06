@@ -33,10 +33,23 @@ export default function Qrcode({ sessionId, onBack }: QrcodeProps) {
     setError('');
     
     try {
+      // Sincronizar token antes de tentar obter QR
+      await whatsappAPI.syncAuthToken();
+      
       const base64 = await whatsappAPI.getQRCodeBase64(selectedSession);
       setQrCode(`data:image/png;base64,${base64}`);
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Erro ao carregar QR Code');
+      console.error('Erro ao carregar QR Code:', error);
+      
+      if (error.response?.status === 401) {
+        setError('Sessão expirada. Faça login novamente.');
+      } else if (error.response?.status === 403) {
+        setError('Acesso negado. Esta sessão não pertence a você.');
+      } else if (error.response?.status === 404) {
+        setError('QR Code não disponível. A sessão pode já estar conectada.');
+      } else {
+        setError(error.response?.data?.message || 'Erro ao carregar QR Code');
+      }
     } finally {
       setIsLoading(false);
     }

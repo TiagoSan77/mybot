@@ -10,7 +10,6 @@ interface CreateSessionModalProps {
 
 export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSessionModalProps) {
   const [formData, setFormData] = useState({
-    id: '',
     name: ''
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -18,8 +17,8 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!formData.id.trim() || !formData.name.trim()) {
-      setError('ID e nome são obrigatórios');
+    if (!formData.name.trim()) {
+      setError('Nome da sessão é obrigatório');
       return;
     }
 
@@ -28,7 +27,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
 
     try {
       await whatsappAPI.createSession(formData);
-      setFormData({ id: '', name: '' });
+      setFormData({ name: '' });
       onSessionCreated();
       onClose();
     } catch (error: any) {
@@ -58,24 +57,8 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="id" className="block text-sm font-medium text-gray-700 mb-2">
-              ID da Sessão
-            </label>
-            <input
-              type="text"
-              id="id"
-              name="id"
-              value={formData.id}
-              onChange={handleChange}
-              placeholder="Ex: cliente-1"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Nome do Cliente
+              Nome da Sessão
             </label>
             <input
               type="text"
@@ -83,10 +66,13 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Ex: João Silva"
+              placeholder="Ex: WhatsApp Pessoal, Cliente João Silva"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               disabled={isLoading}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              O ID da sessão será gerado automaticamente
+            </p>
           </div>
 
           {error && (

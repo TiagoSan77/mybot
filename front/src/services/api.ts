@@ -14,10 +14,78 @@ const api = axios.create({
   timeout: 10000,
 });
 
+// Interceptor para adicionar token de autenticação
+api.interceptors.request.use(async (config) => {
+  // Tentar obter token do Firebase Auth diretamente
+  try {
+    const { getAuth } = await import('firebase/auth');
+    const auth = getAuth();
+    
+    if (auth.currentUser) {
+      const token = await auth.currentUser.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+      localStorage.setItem('firebaseToken', token);
+    } else {
+      // Fallback para token armazenado
+      const token = localStorage.getItem('firebaseToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+  } catch (error) {
+    console.warn('Erro ao obter token Firebase:', error);
+    // Fallback para token armazenado
+    const token = localStorage.getItem('firebaseToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  
+  return config;
+});
+
 export const whatsappAPI = {
+  // Configurar token de autenticação
+  setAuthToken(token: string | null) {
+    if (token) {
+      localStorage.setItem('firebaseToken', token);
+    } else {
+      localStorage.removeItem('firebaseToken');
+    }
+  },
+
+  // Sincronizar token com Firebase Auth atual
+  async syncAuthToken(): Promise<void> {
+    try {
+      const { getAuth } = await import('firebase/auth');
+      const auth = getAuth();
+      
+      if (auth.currentUser) {
+        const token = await auth.currentUser.getIdToken(true); // Force refresh
+        this.setAuthToken(token);
+      } else {
+        this.setAuthToken(null);
+      }
+    } catch (error) {
+      console.error('Erro ao sincronizar token:', error);
+    }
+  },
+
   // Verificar status da API
   async getAPIStatus(): Promise<string> {
     const response = await api.get('/');
+    return response.data;
+  },
+
+  // Verificar status de autenticação
+  async getAuthStatus(): Promise<any> {
+    const response = await api.get('/auth/status');
+    return response.data;
+  },
+
+  // Verificar token
+  async verifyToken(): Promise<any> {
+    const response = await api.post('/auth/verify');
     return response.data;
   },
 
@@ -60,6 +128,14 @@ export const whatsappAPI = {
   // URL para imagem QR code direta
   getQRImageURL(sessionId: string): string {
     return `${API_BASE_URL}/sessions/${sessionId}/qr/image`;
+  },
+
+  // Obter imagem QR como blob com autenticação
+  async getQRCodeImage(sessionId: string): Promise<Blob> {
+    const response = await api.get(`/sessions/${sessionId}/qr/image`, {
+      responseType: 'blob'
+    });
+    return response.data;
   }
 };
 

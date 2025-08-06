@@ -24,8 +24,7 @@ export interface QRResponse {
 }
 
 export interface CreateSessionRequest {
-  id: string;
-  name: string;
+  name: string; // ID será gerado automaticamente no backend
 }
 
 export interface CreateSessionResponse {

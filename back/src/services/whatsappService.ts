@@ -4,6 +4,7 @@ import fs from 'fs';
 import { Session } from '../types/session';
 import DatabaseConfig from '../config/database';
 import AppConfig from '../config/app';
+import mongoose from 'mongoose';
 
 class WhatsAppService {
     private static instance: WhatsAppService;
@@ -134,20 +135,38 @@ class WhatsAppService {
             return false;
         }
 
-        // Remover cliente ativo se existir
-        const client = this.activeClients.get(sessionId);
-        if (client) {
-            await client.destroy();
-            this.activeClients.delete(sessionId);
+        const session = this.sessions[sessionIndex];
+        const db = DatabaseConfig.getInstance();
+
+        try {
+            // Remover cliente ativo se existir
+            const client = this.activeClients.get(sessionId);
+            if (client) {
+                await client.destroy();
+                this.activeClients.delete(sessionId);
+            }
+
+            // Remover QR code
+            this.qrCodes.delete(sessionId);
+
+            // Remover da lista de sessões em memória
+            this.sessions.splice(sessionIndex, 1);
+
+            // Remover do banco de dados
+            if (db.isConnected() && mongoose.connection.db) {
+                const appConfig = this.config.get();
+                const collection = mongoose.connection.db.collection(appConfig.sessionsCollectionName);
+                await collection.deleteOne({ id: sessionId });
+                console.log(`🗑️ Sessão '${sessionId}' removida do banco de dados`);
+            }
+
+            console.log(`✅ Sessão '${sessionId}' deletada completamente`);
+            return true;
+
+        } catch (error) {
+            console.error(`❌ Erro ao deletar sessão '${sessionId}':`, error);
+            throw error;
         }
-
-        // Remover QR code
-        this.qrCodes.delete(sessionId);
-
-        // Remover da lista de sessões
-        this.sessions.splice(sessionIndex, 1);
-
-        return true;
     }
 
     public getSessionStatus(sessionId: string): {
