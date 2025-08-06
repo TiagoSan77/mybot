@@ -1,0 +1,96 @@
+import { Client, RemoteAuth } from 'whatsapp-web.js';
+import { MongoStore } from 'wwebjs-mongo';
+import mongoose from 'mongoose';
+import qrcode from 'qrcode';
+import fs from 'fs';
+
+// Configuração das sessões
+let sessions = [] as { id: string, name: string }[];
+let activeClients = new Map<string, Client>();
+let qrCodes = new Map<string, string>();
+
+let store: any = null;
+
+// Conectar ao MongoDB
+mongoose.connect("mongodb+srv://notebook:igoY1EVTWVb7vDAh@cluster0.51trz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/whatsbot").then(() => {
+    store = new MongoStore({ mongoose: mongoose });
+    console.log('MongoDB conectado com sucesso!');
+}).catch((error) => {
+    console.error('Erro ao conectar com MongoDB:', error);
+});
+
+// Função para criar e inicializar uma nova sessão
+function createSession(sessionData: { id: string, name: string }) {
+    if (!store) {
+        throw new Error('MongoDB não está conectado');
+    }
+
+    if (activeClients.has(sessionData.id)) {
+        throw new Error(`Sessão ${sessionData.id} já existe`);
+    }
+
+    const client = new Client({
+        authStrategy: new RemoteAuth({
+            store: store,
+            backupSyncIntervalMs: 300000,
+            clientId: sessionData.id
+        })
+    });
+
+    // Eventos para cada sessão
+    client.on('qr', (qr) => {
+        console.log(`QR Code gerado para ${sessionData.name} (${sessionData.id})`);
+        
+        // Gerar QR Code em base64
+        qrcode.toDataURL(qr, (error: Error | null | undefined, url: string) => {
+            if (error) {
+                console.error(`Erro ao gerar QR Code para ${sessionData.name} (${sessionData.id}):`, error);
+            } else {
+                console.log(`QR Code Base64 para ${sessionData.name} (${sessionData.id}) gerado`);
+                
+                // Armazenar QR code na memória
+                qrCodes.set(sessionData.id, url);
+                
+                // Salvar em arquivo (opcional)
+                fs.writeFileSync(`qr-${sessionData.id}.txt`, url);
+                console.log(`QR Code salvo em qr-${sessionData.id}.txt`);
+            }
+        });
+    });
+
+    client.on('ready', () => {
+        console.log(`${sessionData.name} (${sessionData.id}) está pronto!`);
+        // Remove QR code quando autenticado
+        qrCodes.delete(sessionData.id);
+    });
+
+    client.on('authenticated', () => {
+        console.log(`${sessionData.name} (${sessionData.id}) autenticado com sucesso!`);
+    });
+
+    client.on('auth_failure', (msg) => {
+        console.error(`Falha na autenticação para ${sessionData.name} (${sessionData.id}):`, msg);
+    });
+
+    client.on('disconnected', (reason) => {
+        console.log(`${sessionData.name} (${sessionData.id}) desconectado:`, reason);
+        // Remove da lista de clientes ativos
+        activeClients.delete(sessionData.id);
+        qrCodes.delete(sessionData.id);
+    });
+
+    // Armazenar cliente ativo
+    activeClients.set(sessionData.id, client);
+
+    // Inicializar o cliente
+    client.initialize().then(() => {
+        console.log(`${sessionData.name} (${sessionData.id}) inicializado com sucesso!`);
+    }).catch((error) => {
+        console.error(`Erro ao inicializar ${sessionData.name} (${sessionData.id}):`, error);
+        activeClients.delete(sessionData.id);
+    });
+
+    return client;
+}
+
+export { sessions, createSession, activeClients, qrCodes };

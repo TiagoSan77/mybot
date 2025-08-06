@@ -1,0 +1,35 @@
+{
+  "name": "back",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev src/index.ts",
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "docker:build": "docker build -t whatsapp-bot:latest .",
+    "docker:run": "docker run -d --name whatsapp-bot-container -p 3000:3000 --env-file .env.docker whatsapp-bot:latest",
+    "docker:stop": "docker stop whatsapp-bot-container && docker rm whatsapp-bot-container",
+    "docker:logs": "docker logs -f whatsapp-bot-container",
+    "compose:up": "docker-compose up -d",
+    "compose:down": "docker-compose down",
+    "compose:logs": "docker-compose logs -f"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/qrcode": "^1.5.5",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.17.0",
+    "qrcode": "^1.5.4",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "whatsapp-web.js": "^1.31.0",
+    "wwebjs-mongo": "^1.1.0"
+  }
+}
