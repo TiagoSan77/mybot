@@ -46,7 +46,7 @@ class WhatsAppService {
                 console.log(`📂 Encontradas ${savedSessions.length} sessões salvas no MongoDB`);
                 
                 // Converter para o formato Session e adicionar à memória
-                this.sessions = savedSessions.map(doc => ({
+                this.sessions = savedSessions.map((doc: any) => ({
                     id: doc.sessionId,
                     name: doc.sessionName || doc.sessionId, // Usar sessionName salvo ou sessionId como fallback
                     userId: doc.userId,
