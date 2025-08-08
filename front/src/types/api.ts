@@ -77,3 +77,62 @@ export interface ApiError {
   message: string;
   error?: string;
 }
+
+// === TEMPLATES DE MENSAGEM ===
+
+export interface MessageTemplate {
+  templateId: string;
+  name: string;
+  content: string;
+  category?: string;
+  tags?: string[];
+  isActive: boolean;
+  usageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTemplateRequest {
+  name: string;
+  content: string;
+  category?: string;
+  tags?: string[];
+}
+
+export interface CreateTemplateResponse {
+  success: boolean;
+  message: string;
+  data: MessageTemplate;
+}
+
+export interface TemplatesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    templates: MessageTemplate[];
+    categorized: Record<string, MessageTemplate[]>;
+    total: number;
+  };
+}
+
+export interface TemplateResponse {
+  success: boolean;
+  message: string;
+  data: MessageTemplate;
+}
+
+export interface UpdateTemplateRequest {
+  name?: string;
+  content?: string;
+  category?: string;
+  tags?: string[];
+  isActive?: boolean;
+}
+
+export interface CategoriesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    categories: string[];
+  };
+}

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import whatsappAPI from '../../services/api';
-import type { Session, SessionInfoResponse, SendMessageResponse } from '../../types/api';
+import type { Session, SessionInfoResponse, SendMessageResponse, MessageTemplate } from '../../types/api';
+import QuickTemplateSave from './QuickTemplateSave';
+import TemplateManager from './TemplateManager';
 
 interface SendMessageModalProps {
   isOpen: boolean;
@@ -211,9 +213,18 @@ const SendMessageModal: React.FC<SendMessageModalProps> = ({
 
           {/* Mensagem */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mensagem
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Mensagem
+              </label>
+              <QuickTemplateSave 
+                message={message}
+                onTemplateSaved={() => {
+                  // Pode adicionar lógica adicional aqui se necessário
+                }}
+                className="text-xs"
+              />
+            </div>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -226,6 +237,16 @@ const SendMessageModal: React.FC<SendMessageModalProps> = ({
             <p className="text-xs text-gray-500 mt-1">
               {message.length} caracteres
             </p>
+          </div>
+
+          {/* Gerenciador de Templates */}
+          <div>
+            <TemplateManager 
+              showCompact={true}
+              onSelectTemplate={(template: MessageTemplate) => {
+                setMessage(template.content);
+              }}
+            />
           </div>
 
           {/* Mensagens de erro/sucesso */}

@@ -501,8 +501,18 @@ class WhatsAppService {
         const hasQRCode = this.qrCodes.has(sessionId);
 
         let status: 'waiting_qr' | 'connected' | 'disconnected' = 'disconnected';
-        if (hasQRCode) status = 'waiting_qr';
-        if (isActive && !hasQRCode) status = 'connected';
+        
+        if (hasQRCode) {
+            status = 'waiting_qr';
+        } else if (isActive) {
+            // Verificar se realmente está conectado
+            const client = this.activeClients.get(sessionId);
+            if (client) {
+                // Para sessões ativas sem QR, assumir conectado
+                // A verificação real será feita quando necessário
+                status = 'connected';
+            }
+        }
 
         return { status, isActive, hasQRCode };
     }
@@ -514,34 +524,116 @@ class WhatsAppService {
             throw new Error(`Sessão '${sessionId}' não está ativa`);
         }
 
-        // Verificar se o cliente está pronto
-        const state = await client.getState();
-        if (state !== 'CONNECTED') {
-            throw new Error(`Sessão '${sessionId}' não está conectada. Estado atual: ${state}`);
-        }
-
-        // Formatar número de telefone (garantir que está no formato correto)
-        let formattedNumber = phoneNumber.replace(/\D/g, ''); // Remove tudo que não é dígito
-        
-        // Se não começar com código do país, assumir Brasil (55)
-        if (!formattedNumber.startsWith('55') && formattedNumber.length === 11) {
-            formattedNumber = '55' + formattedNumber;
-        }
-        
-        // Adicionar @c.us se não estiver presente
-        const chatId = formattedNumber.includes('@') ? formattedNumber : `${formattedNumber}@c.us`;
-
-        console.log(`📤 Enviando mensagem via sessão '${sessionId}' para '${chatId}': ${message.substring(0, 50)}...`);
-
         try {
-            // Verificar se o número é válido
-            const isValidNumber = await client.isRegisteredUser(chatId);
-            if (!isValidNumber) {
-                throw new Error(`Número '${phoneNumber}' não está registrado no WhatsApp`);
+            // Verificar se o cliente está pronto com timeout
+            console.log(`🔍 Verificando estado da sessão '${sessionId}'...`);
+            
+            // Aguardar um pouco para garantir que o cliente está totalmente carregado
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const state = await Promise.race([
+                client.getState(),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout ao verificar estado')), 10000)
+                )
+            ]);
+            
+            console.log(`📊 Estado da sessão '${sessionId}': ${state}`);
+            
+            if (state !== 'CONNECTED') {
+                throw new Error(`Sessão '${sessionId}' não está conectada. Estado atual: ${state}`);
             }
 
-            // Enviar mensagem
-            const sentMessage = await client.sendMessage(chatId, message);
+            // Aguardar mais um pouco para garantir que todos os recursos estão carregados
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Formatar número de telefone (garantir que está no formato correto)
+            let formattedNumber = phoneNumber.replace(/\D/g, ''); // Remove tudo que não é dígito
+            
+            // Se não começar com código do país, assumir Brasil (55)
+            if (!formattedNumber.startsWith('55') && formattedNumber.length === 11) {
+                formattedNumber = '55' + formattedNumber;
+            }
+            
+            // Adicionar @c.us se não estiver presente
+            const chatId = formattedNumber.includes('@') ? formattedNumber : `${formattedNumber}@c.us`;
+
+            console.log(`📤 Enviando mensagem via sessão '${sessionId}' para '${chatId}': ${message.substring(0, 50)}...`);
+
+            // Verificar se o número é válido com timeout e retry
+            let isValidNumber = false;
+            let retryCount = 0;
+            const maxRetries = 3;
+
+            while (!isValidNumber && retryCount < maxRetries) {
+                try {
+                    console.log(`🔍 Verificando validade do número ${chatId} (tentativa ${retryCount + 1})...`);
+                    
+                    isValidNumber = await Promise.race([
+                        client.isRegisteredUser(chatId),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout ao verificar número')), 15000)
+                        )
+                    ]) as boolean;
+                    
+                    if (!isValidNumber) {
+                        throw new Error(`Número '${phoneNumber}' não está registrado no WhatsApp`);
+                    }
+                    
+                    break;
+                } catch (error: any) {
+                    retryCount++;
+                    console.warn(`⚠️ Tentativa ${retryCount} falhou ao verificar número:`, error.message);
+                    
+                    if (retryCount >= maxRetries) {
+                        if (error.message.includes('Timeout')) {
+                            console.log(`⏰ Timeout na verificação, assumindo que número é válido e tentando enviar...`);
+                            isValidNumber = true; // Assumir válido em caso de timeout
+                            break;
+                        } else {
+                            throw error;
+                        }
+                    }
+                    
+                    // Aguardar antes de tentar novamente
+                    await new Promise(resolve => setTimeout(resolve, 2000 * retryCount));
+                }
+            }
+
+            // Enviar mensagem com timeout e retry
+            let sentMessage: any;
+            retryCount = 0;
+
+            while (retryCount < maxRetries) {
+                try {
+                    console.log(`📤 Tentando enviar mensagem (tentativa ${retryCount + 1})...`);
+                    
+                    sentMessage = await Promise.race([
+                        client.sendMessage(chatId, message),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout ao enviar mensagem')), 30000)
+                        )
+                    ]) as any;
+                    
+                    break;
+                } catch (error: any) {
+                    retryCount++;
+                    console.error(`❌ Tentativa ${retryCount} falhou:`, error.message);
+                    
+                    if (retryCount >= maxRetries) {
+                        throw error;
+                    }
+                    
+                    // Aguardar mais tempo antes de tentar novamente
+                    await new Promise(resolve => setTimeout(resolve, 3000 * retryCount));
+                    
+                    // Verificar se ainda está conectado
+                    const currentState = await client.getState();
+                    if (currentState !== 'CONNECTED') {
+                        throw new Error(`Sessão desconectou durante o envio. Estado atual: ${currentState}`);
+                    }
+                }
+            }
             
             console.log(`✅ Mensagem enviada com sucesso - ID: ${sentMessage.id._serialized}`);
             
@@ -555,6 +647,22 @@ class WhatsAppService {
 
         } catch (error: any) {
             console.error(`❌ Erro ao enviar mensagem via sessão '${sessionId}':`, error);
+            
+            // Verificar se a sessão ainda está ativa após o erro
+            try {
+                const state = await client.getState();
+                console.log(`📊 Estado da sessão após erro: ${state}`);
+                
+                if (state !== 'CONNECTED') {
+                    console.log(`⚠️ Sessão '${sessionId}' não está mais conectada, removendo da lista de ativos`);
+                    this.activeClients.delete(sessionId);
+                }
+            } catch (stateError) {
+                console.error(`❌ Erro ao verificar estado após falha:`, stateError);
+                // Remover sessão da lista se não conseguir verificar estado
+                this.activeClients.delete(sessionId);
+            }
+            
             throw new Error(`Falha ao enviar mensagem: ${error.message}`);
         }
     }

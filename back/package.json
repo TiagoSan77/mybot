@@ -22,6 +22,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^10.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
@@ -31,6 +32,7 @@
     "qrcode": "^1.5.4",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "uuid": "^11.1.0",
     "whatsapp-web.js": "^1.31.0",
     "wwebjs-mongo": "^1.1.0"
   }

@@ -7,7 +7,13 @@ import type {
   CreateSessionResponse,
   SendMessageRequest,
   SendMessageResponse,
-  SessionInfoResponse
+  SessionInfoResponse,
+  CreateTemplateRequest,
+  CreateTemplateResponse,
+  TemplatesResponse,
+  TemplateResponse,
+  UpdateTemplateRequest,
+  CategoriesResponse
 } from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -152,6 +158,59 @@ export const whatsappAPI = {
   // Obter informações de uma sessão para envio
   async getSessionInfo(sessionId: string): Promise<SessionInfoResponse> {
     const response = await api.get(`/messages/session/${sessionId}`);
+    return response.data;
+  },
+
+  // === TEMPLATES DE MENSAGEM ===
+
+  // Criar novo template
+  async createTemplate(data: CreateTemplateRequest): Promise<CreateTemplateResponse> {
+    const response = await api.post('/templates', data);
+    return response.data;
+  },
+
+  // Listar templates
+  async getTemplates(params?: {
+    category?: string;
+    active?: boolean;
+    search?: string;
+  }): Promise<TemplatesResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.active !== undefined) queryParams.append('active', params.active.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    
+    const response = await api.get(`/templates?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  // Obter template específico
+  async getTemplate(templateId: string): Promise<TemplateResponse> {
+    const response = await api.get(`/templates/${templateId}`);
+    return response.data;
+  },
+
+  // Atualizar template
+  async updateTemplate(templateId: string, data: UpdateTemplateRequest): Promise<TemplateResponse> {
+    const response = await api.put(`/templates/${templateId}`, data);
+    return response.data;
+  },
+
+  // Deletar template
+  async deleteTemplate(templateId: string): Promise<{ success: boolean; message: string }> {
+    const response = await api.delete(`/templates/${templateId}`);
+    return response.data;
+  },
+
+  // Registrar uso de template
+  async incrementTemplateUsage(templateId: string): Promise<{ success: boolean; message: string; data: { templateId: string; usageCount: number } }> {
+    const response = await api.post(`/templates/${templateId}/use`);
+    return response.data;
+  },
+
+  // Obter categorias de templates
+  async getTemplateCategories(): Promise<CategoriesResponse> {
+    const response = await api.get('/templates/categories');
     return response.data;
   }
 };
