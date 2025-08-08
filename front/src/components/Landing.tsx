@@ -218,7 +218,6 @@ export default function Landing() {
               { name: "React", desc: "Interface moderna" },
               { name: "MongoDB", desc: "Banco de dados" },
               { name: "Express.js", desc: "API REST" },
-              { name: "WhatsApp Web.js", desc: "Integração WhatsApp" },
               { name: "Tailwind CSS", desc: "Design responsivo" },
               { name: "Vite", desc: "Build otimizado" }
             ].map((tech, index) => (

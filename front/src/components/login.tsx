@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, Lock, User, Eye, EyeOff, Loader2, ArrowLeft, UserPlus } from 'lucide-react';
+import { MessageCircle, Lock, User, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import whatsappAPI from '../services/api';
 
@@ -207,15 +207,6 @@ export default function Login() {
                         </button>
                     </div>
 
-                    {/* Informações de Demo */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-md">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">🔥 Firebase Authentication</h4>
-                        <div className="text-sm text-gray-600 space-y-1">
-                            <p>• Crie uma conta ou use uma existente</p>
-                            <p>• Autenticação segura com Firebase</p>
-                            <p>• Sessões isoladas por usuário</p>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Footer */}
