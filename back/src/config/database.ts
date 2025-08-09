@@ -25,10 +25,11 @@ class DatabaseConfig {
             await mongoose.connect(appConfig.mongodbUri);
             this.mongoStore = new MongoStore({ 
                 mongoose: mongoose,
-                collectionName: appConfig.sessionsCollectionName
+                collectionName: 'whatsappAuth' // Collection separada para dados de autenticação
             });
             console.log('✅ MongoDB conectado com sucesso!');
             console.log(`📦 Collection: ${appConfig.sessionsCollectionName}`);
+            console.log(`🔐 Auth Collection: whatsappAuth`);
         } catch (error) {
             console.error('❌ Erro ao conectar com MongoDB:', error);
             throw error;

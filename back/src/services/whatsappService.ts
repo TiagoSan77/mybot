@@ -40,7 +40,8 @@ class WhatsAppService {
             if (db.isConnected()) {
                 // Aguardar um pouco mais para garantir que o store está totalmente carregado
                 console.log('⏳ Aguardando inicialização completa do MongoDB store...');
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 3000)); // Aumentado para 3 segundos
+                
                 const savedSessions = await SessionModel.find({}).lean();
                 console.log(`📂 Encontradas ${savedSessions.length} sessões salvas no MongoDB`);
                 
@@ -71,6 +72,15 @@ class WhatsAppService {
     // Reconectar sessões existentes automaticamente
     private async reconnectExistingSessions(): Promise<void> {
         console.log(`🔄 Tentando reconectar ${this.sessions.length} sessões...`);
+        
+        // Limpar clientes ativos anteriores (importante após restart do servidor)
+        this.activeClients.clear();
+        this.qrCodes.clear();
+        console.log('🧹 Cache de clientes ativos limpo');
+        
+        // Aguardar mais tempo para garantir que o store está totalmente carregado
+        console.log('⏳ Aguardando store estar totalmente carregado para reconexão...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
         for (const session of this.sessions) {
             try {
@@ -82,18 +92,35 @@ class WhatsAppService {
                     continue;
                 }
 
-                // Verificar se a sessão já não está ativa
-                if (this.activeClients.has(session.id)) {
-                    console.log(`⚠️  Sessão ${session.name} já está ativa, pulando reconexão`);
-                    continue;
+                // Verificar se já existe autenticação salva para esta sessão
+                const store = db.getStore();
+                console.log(`🔍 Verificando autenticação existente para sessão ${session.id}...`);
+                
+                try {
+                    // Tentar buscar dados de autenticação existentes
+                    const existingAuth = await store.sessionExists({ session: session.id });
+                    console.log(`📊 Sessão ${session.id} tem autenticação salva: ${existingAuth ? 'SIM' : 'NÃO'}`);
+                    
+                    if (existingAuth) {
+                        console.log(`🔄 Reconectando automaticamente sessão ${session.id} com autenticação salva`);
+                    } else {
+                        console.log(`� Sessão ${session.id} será iniciada e aguardará QR code para autenticação`);
+                    }
+                } catch (error) {
+                    console.log(`⚠️ Erro ao verificar autenticação existente:`, error);
+                    console.log(`🔄 Tentando conectar sessão ${session.id} mesmo assim...`);
                 }
 
-                // Criar cliente WhatsApp
+                // Criar cliente WhatsApp SEMPRE (com ou sem autenticação)
+                console.log(`🚀 Inicializando cliente WhatsApp para ${session.id}...`);
+                
+                // Configuração mais robusta do RemoteAuth
                 const client = new Client({
                     authStrategy: new RemoteAuth({
                         store: db.getStore(),
                         backupSyncIntervalMs: this.config.get().backupSyncInterval,
-                        clientId: session.id
+                        clientId: session.id,
+                        dataPath: `./.wwebjs_auth/session_${session.id}` // Path específico para cada sessão
                     }),
                     puppeteer: {
                         headless: true,
@@ -279,7 +306,8 @@ class WhatsAppService {
             authStrategy: new RemoteAuth({
                 store: db.getStore(),
                 backupSyncIntervalMs: this.config.get().backupSyncInterval,
-                clientId: sessionData.id
+                clientId: sessionData.id,
+                dataPath: `./.wwebjs_auth/session_${sessionData.id}` // Path específico para cada sessão
             }),
             puppeteer: {
                 headless: true,
