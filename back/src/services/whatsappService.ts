@@ -1,6 +1,5 @@
 import { Client, RemoteAuth } from 'whatsapp-web.js';
 import qrcode from 'qrcode';
-import fs from 'fs';
 import { Session } from '../types/session';
 import DatabaseConfig from '../config/database';
 import AppConfig from '../config/app';
@@ -216,7 +215,7 @@ class WhatsAppService {
                     );
                 }
                 
-                console.log(`📝 Status da sessão '${sessionId}' atualizado no banco:`, status);
+                console.log(`📝 Status da sessão '${sessionId}'`);
             }
         } catch (error) {
             console.error(`❌ Erro ao atualizar status da sessão '${sessionId}':`, error);
@@ -338,12 +337,6 @@ class WhatsAppService {
                     
                     // Salvar QR code no banco de dados
                     await this.updateSessionStatus(sessionData.id, { qr: url, ready: false, connected: false });
-                    
-                    // Salvar em arquivo (se configurado)
-                    if (this.config.get().saveQrFiles) {
-                        fs.writeFileSync(`qr-${sessionData.id}.txt`, url);
-                        console.log(`💾 QR Code salvo em qr-${sessionData.id}.txt`);
-                    }
                 }
             });
         });
@@ -406,12 +399,6 @@ class WhatsAppService {
                     
                     // Salvar QR code no banco de dados
                     await this.updateSessionStatus(sessionData.id, { qr: url, ready: false, connected: false });
-                    
-                    // Salvar em arquivo (se configurado)
-                    if (this.config.get().saveQrFiles) {
-                        fs.writeFileSync(`qr-${sessionData.id}.txt`, url);
-                        console.log(`QR Code salvo em qr-${sessionData.id}.txt`);
-                    }
                 }
             });
         });
