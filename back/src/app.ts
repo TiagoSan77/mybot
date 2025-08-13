@@ -3,6 +3,7 @@ import cors from 'cors';
 import routes from './routes';
 import DatabaseConfig from './config/database';
 import AppConfig from './config/app';
+import { SchedulerService } from './services/schedulerService';
 
 class App {
     public app: express.Application;
@@ -54,6 +55,10 @@ class App {
             // Conectar ao banco de dados
             const db = DatabaseConfig.getInstance();
             await db.connect();
+
+            // Inicializar serviço de agendamento de mensagens
+            console.log('📅 Inicializando serviço de agendamento...');
+            SchedulerService.getInstance();
 
             // Iniciar servidor
             this.app.listen(appConfig.port, () => {

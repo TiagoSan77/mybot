@@ -8,9 +8,11 @@ import SessionList from "./ui/SessionList";
 import CreateSessionModal from "./ui/CreateSessionModal";
 import QRCodeModal from "./ui/QRCodeModal";
 import SendMessageModal from "./ui/SendMessageModal";
+import MessageScheduler from "./MessageScheduler";
 import type { Session, SendMessageResponse } from '../types/api';
 
 export default function Dashboard() {
+    const [activeTab, setActiveTab] = useState<'sessions' | 'scheduler'>('sessions');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isSendMessageModalOpen, setIsSendMessageModalOpen] = useState(false);
     const [qrModal, setQrModal] = useState<{isOpen: boolean, sessionId: string, sessionName: string}>({
@@ -124,17 +126,54 @@ export default function Dashboard() {
             </div>
             
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Navegação por abas */}
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Gerenciar Sessões WhatsApp</h2>
-                    <p className="text-gray-600">
-                        Crie e gerencie múltiplas sessões do WhatsApp Web simultaneamente
-                    </p>
+                    <div className="border-b border-gray-200">
+                        <nav className="-mb-px flex space-x-8">
+                            <button
+                                onClick={() => setActiveTab('sessions')}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeTab === 'sessions'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                📱 Sessões WhatsApp
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('scheduler')}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeTab === 'scheduler'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                📅 Agendador de Mensagens
+                            </button>
+                        </nav>
+                    </div>
                 </div>
 
-                <SessionList 
-                    onShowQR={handleShowQR}
-                    refreshTrigger={refreshTrigger}
-                />
+                {/* Conteúdo das abas */}
+                {activeTab === 'sessions' && (
+                    <div>
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Gerenciar Sessões WhatsApp</h2>
+                            <p className="text-gray-600">
+                                Crie e gerencie múltiplas sessões do WhatsApp Web simultaneamente
+                            </p>
+                        </div>
+
+                        <SessionList 
+                            onShowQR={handleShowQR}
+                            refreshTrigger={refreshTrigger}
+                        />
+                    </div>
+                )}
+
+                {activeTab === 'scheduler' && (
+                    <MessageScheduler />
+                )}
             </main>
 
             <CreateSessionModal

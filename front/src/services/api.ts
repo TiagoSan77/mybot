@@ -212,6 +212,47 @@ export const whatsappAPI = {
   async getTemplateCategories(): Promise<CategoriesResponse> {
     const response = await api.get('/templates/categories');
     return response.data;
+  },
+
+  // ============= MÉTODOS PARA AGENDAMENTO DE MENSAGENS =============
+
+  // Obter templates para agendamento
+  async getSchedulerTemplates(): Promise<any> {
+    const response = await api.get('/scheduled/templates');
+    return response.data;
+  },
+
+  // Agendar mensagem
+  async scheduleMessage(data: any): Promise<any> {
+    const response = await api.post('/scheduled', data);
+    return response.data;
+  },
+
+  // Listar mensagens agendadas
+  async getScheduledMessages(params?: { status?: string }): Promise<any> {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    
+    const response = await api.get(`/scheduled?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  // Cancelar mensagem agendada
+  async cancelScheduledMessage(messageId: string): Promise<any> {
+    const response = await api.delete(`/scheduled/${messageId}`);
+    return response.data;
+  },
+
+  // Atualizar mensagem agendada
+  async updateScheduledMessage(messageId: string, data: any): Promise<any> {
+    const response = await api.put(`/scheduled/${messageId}`, data);
+    return response.data;
+  },
+
+  // Obter status do agendador
+  async getSchedulerStatus(): Promise<any> {
+    const response = await api.get('/scheduled/scheduler/status');
+    return response.data;
   }
 };
 

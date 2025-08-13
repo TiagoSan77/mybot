@@ -29,11 +29,15 @@
     "firebase": "^12.0.0",
     "firebase-admin": "^13.4.0",
     "mongoose": "^8.17.0",
+    "node-cron": "^4.2.1",
     "qrcode": "^1.5.4",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "uuid": "^11.1.0",
     "whatsapp-web.js": "^1.31.0",
     "wwebjs-mongo": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11"
   }
 }

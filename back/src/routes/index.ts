@@ -4,6 +4,7 @@ import qrRoutes from './qrRoutes';
 import authRoutes from './auth';
 import messageRoutes from './messageRoutes';
 import messageTemplateRoutes from './messageTemplateRoutes';
+import { scheduledMessageRoutes } from './scheduledMessageRoutes';
 
 const router = Router();
 
@@ -17,7 +18,8 @@ router.get('/', (req, res) => {
             sessions: '/sessions',
             qr: '/sessions/:id/qr',
             messages: '/messages',
-            templates: '/templates'
+            templates: '/templates',
+            scheduled: '/scheduled'
         },
         timestamp: new Date().toISOString()
     });
@@ -29,5 +31,6 @@ router.use('/sessions', sessionRoutes);    // Rotas de sessões
 router.use('/sessions', qrRoutes);         // Rotas de QR Code
 router.use('/messages', messageRoutes);    // Rotas de mensagens
 router.use('/templates', messageTemplateRoutes); // Rotas de templates
+router.use('/scheduled', scheduledMessageRoutes); // Rotas de mensagens agendadas
 
 export default router;
