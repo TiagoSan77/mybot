@@ -48,11 +48,11 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md">
         <div className="flex items-center gap-3 mb-4">
-          <Plus className="w-6 h-6 text-green-600" />
-          <h2 className="text-xl font-semibold">Nova Sessão WhatsApp</h2>
+          <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+          <h2 className="text-lg sm:text-xl font-semibold">Nova Sessão WhatsApp</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -67,7 +67,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
               value={formData.name}
               onChange={handleChange}
               placeholder="Ex: WhatsApp Pessoal, Cliente João Silva"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
               disabled={isLoading}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -81,11 +81,11 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full sm:flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm sm:text-base"
               disabled={isLoading}
             >
               Cancelar
@@ -93,15 +93,19 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full sm:flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Criando...
+                  <span className="hidden sm:inline">Criando...</span>
+                  <span className="sm:hidden">Criando</span>
                 </>
               ) : (
-                'Criar Sessão'
+                <>
+                  <span className="hidden sm:inline">Criar Sessão</span>
+                  <span className="sm:hidden">Criar</span>
+                </>
               )}
             </button>
           </div>

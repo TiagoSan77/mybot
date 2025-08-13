@@ -95,13 +95,13 @@ function SessionCard({ session, onShowQR, onDelete, onRefresh }: SessionCardProp
   }, [session.id]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{session.name}</h3>
-          <p className="text-sm text-gray-600">ID: {session.id}</p>
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+      <div className="flex flex-col sm:flex-row items-start justify-between mb-4 space-y-2 sm:space-y-0">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{session.name}</h3>
+          <p className="text-xs sm:text-sm text-gray-600 truncate">ID: {session.id}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={loadStatus}
             className="p-1 hover:bg-gray-100 rounded"
@@ -126,18 +126,19 @@ function SessionCard({ session, onShowQR, onDelete, onRefresh }: SessionCardProp
         </span>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <button
           onClick={() => onShowQR(session.id, session.name)}
           disabled={status?.status === 'connected'}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <QrCode className="w-4 h-4" />
-          Ver QR Code
+          <span className="hidden sm:inline">Ver QR Code</span>
+          <span className="sm:hidden">QR Code</span>
         </button>
         <button
           onClick={loadStatus}
-          className="flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+          className="flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-50 transition-colors"
         >
           <Phone className="w-4 h-4" />
           Status
@@ -192,14 +193,14 @@ export default function SessionList({ onShowQR, refreshTrigger }: SessionListPro
 
   if (error) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-8 sm:py-12 px-4">
         <div className="text-red-600 mb-4">
-          <p className="font-medium">Erro ao carregar sessões</p>
-          <p className="text-sm">{error}</p>
+          <p className="font-medium text-sm sm:text-base">Erro ao carregar sessões</p>
+          <p className="text-xs sm:text-sm">{error}</p>
         </div>
         <button
           onClick={loadSessions}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors mx-auto"
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors mx-auto"
         >
           <RefreshCw className="w-4 h-4" />
           Tentar Novamente
@@ -210,16 +211,16 @@ export default function SessionList({ onShowQR, refreshTrigger }: SessionListPro
 
   if (sessions.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Phone className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma sessão encontrada</h3>
-        <p className="text-gray-600">Crie sua primeira sessão WhatsApp para começar</p>
+      <div className="text-center py-8 sm:py-12 px-4">
+        <Phone className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Nenhuma sessão encontrada</h3>
+        <p className="text-sm sm:text-base text-gray-600">Crie sua primeira sessão WhatsApp para começar</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
       {sessions.map((session) => (
         <SessionCard
           key={session.id}

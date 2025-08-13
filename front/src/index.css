@@ -1,3 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Melhorias de responsividade */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@layer utilities {
+  /* Scroll horizontal suave para abas em mobile */
+  .scroll-smooth-x {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Quebra de texto responsiva */
+  .text-break {
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  
+  /* Classes para melhorar input em mobile */
+  .input-mobile {
+    font-size: 16px; /* Evita zoom no iOS */
+  }
+}
+
+/* Estados de focus mais visíveis em mobile */
+@media (hover: none) and (pointer: coarse) {
+  .focus-visible:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
