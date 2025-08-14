@@ -4,6 +4,8 @@ import routes from './routes';
 import DatabaseConfig from './config/database';
 import AppConfig from './config/app';
 import { SchedulerService } from './services/schedulerService';
+import subscriptionService from './services/subscriptionService';
+import * as cron from 'node-cron';
 
 class App {
     public app: express.Application;
@@ -56,9 +58,20 @@ class App {
             const db = DatabaseConfig.getInstance();
             await db.connect();
 
+            // Inicializar planos de pagamento
+            console.log('💳 Inicializando planos de pagamento...');
+            await subscriptionService.initializePlans();
+
             // Inicializar serviço de agendamento de mensagens
             console.log('📅 Inicializando serviço de agendamento...');
             SchedulerService.getInstance();
+
+            // Agendar verificação de assinaturas expiradas (diariamente às 6h)
+            cron.schedule('0 6 * * *', async () => {
+                console.log('🔍 Verificando assinaturas expiradas...');
+                const expiredCount = await subscriptionService.checkExpiredSubscriptions();
+                console.log(`📊 ${expiredCount} assinatura(s) expirada(s) processada(s)`);
+            });
 
             // Iniciar servidor
             this.app.listen(appConfig.port, () => {

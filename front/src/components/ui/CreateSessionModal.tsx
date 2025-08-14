@@ -6,14 +6,16 @@ interface CreateSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSessionCreated: () => void;
+  onUpgradeNeeded?: () => void;
 }
 
-export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }: CreateSessionModalProps) {
+export default function CreateSessionModal({ isOpen, onClose, onSessionCreated, onUpgradeNeeded }: CreateSessionModalProps) {
   const [formData, setFormData] = useState({
     name: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,6 +26,7 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
 
     setIsLoading(true);
     setError('');
+    setLimitReached(false);
 
     try {
       await whatsappAPI.createSession(formData);
@@ -31,9 +34,23 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
       onSessionCreated();
       onClose();
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Erro ao criar sessão');
+      const errorData = error.response?.data;
+      
+      if (errorData?.needsSubscription || errorData?.currentCount >= errorData?.maxDevices) {
+        setLimitReached(true);
+        setError(errorData?.message || 'Limite de dispositivos atingido');
+      } else {
+        setError(errorData?.message || 'Erro ao criar sessão');
+      }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleUpgrade = () => {
+    onClose();
+    if (onUpgradeNeeded) {
+      onUpgradeNeeded();
     }
   };
 
@@ -76,8 +93,18 @@ export default function CreateSessionModal({ isOpen, onClose, onSessionCreated }
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
-              {error}
+            <div className={`text-sm p-3 rounded-lg ${limitReached ? 'bg-orange-50 border border-orange-200' : 'bg-red-50 border border-red-200'}`}>
+              <div className={limitReached ? 'text-orange-700' : 'text-red-600'}>
+                {error}
+              </div>
+              {limitReached && (
+                <button
+                  onClick={handleUpgrade}
+                  className="mt-2 w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
+                >
+                  Fazer Upgrade do Plano
+                </button>
+              )}
             </div>
           )}
 

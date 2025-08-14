@@ -9,7 +9,9 @@ import {
   ArrowRight,
   CheckCircle,
   Globe,
-  Database
+  Database,
+  Crown,
+  Star
 } from 'lucide-react';
 
 export default function Landing() {
@@ -58,7 +60,62 @@ export default function Landing() {
     "QR codes gerados automaticamente",
     "Status de conexão em tempo real",
     "Interface moderna e responsiva",
-    "API REST completa para integrações"
+    "Agendamento de mensagens",
+    "Templates personalizados"
+  ];
+
+  const plans = [
+    {
+      id: 'plan_1_device',
+      name: 'Plano Básico',
+      devices: 1,
+      price: 39.00,
+      description: 'Ideal para pequenos negócios',
+      features: [
+        '1 dispositivo WhatsApp',
+        'Mensagens ilimitadas',
+        'Agendamento de mensagens',
+        'Templates personalizados',
+        'Suporte básico'
+      ],
+      icon: <Smartphone className="w-8 h-8 text-blue-600" />,
+      popular: false
+    },
+    {
+      id: 'plan_2_devices',
+      name: 'Plano Intermediário',
+      devices: 2,
+      price: 59.00,
+      description: 'Perfeito para empresas em crescimento',
+      features: [
+        '2 dispositivos WhatsApp',
+        'Mensagens ilimitadas',
+        'Agendamento de mensagens',
+        'Templates personalizados',
+        'Suporte prioritário',
+        'Relatórios básicos'
+      ],
+      icon: <Users className="w-8 h-8 text-green-600" />,
+      popular: true
+    },
+    {
+      id: 'plan_3_devices',
+      name: 'Plano Avançado',
+      devices: 3,
+      price: 79.00,
+      description: 'Para empresas que precisam de mais poder',
+      features: [
+        '3 dispositivos WhatsApp',
+        'Mensagens ilimitadas',
+        'Agendamento de mensagens',
+        'Templates personalizados',
+        'Suporte 24/7',
+        'Relatórios avançados',
+        'API personalizada'
+      ],
+      icon: <Crown className="w-8 h-8 text-purple-600" />,
+      popular: false
+    }
   ];
 
   return (
@@ -199,36 +256,84 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Tech Stack Section */}
+      {/* Pricing Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Tecnologias Utilizadas
+              Planos e Preços
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Construído com as melhores tecnologias para performance e confiabilidade
+              Escolha o plano ideal para suas necessidades de WhatsApp Business
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { name: "Node.js", desc: "Backend robusto" },
-              { name: "TypeScript", desc: "Código tipado" },
-              { name: "React", desc: "Interface moderna" },
-              { name: "MongoDB", desc: "Banco de dados" },
-              { name: "Express.js", desc: "API REST" },
-              { name: "Tailwind CSS", desc: "Design responsivo" },
-              { name: "Vite", desc: "Build otimizado" }
-            ].map((tech, index) => (
-              <div key={index} className="text-center p-4 bg-white rounded-lg shadow-sm">
-                <div className="w-12 h-12 bg-green-100 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                  <div className="w-6 h-6 bg-green-600 rounded"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {plans.map((plan) => (
+              <div 
+                key={plan.id}
+                className={`relative bg-white rounded-2xl shadow-lg overflow-hidden ${
+                  plan.popular ? 'border-2 border-green-500 transform scale-105' : 'border border-gray-200'
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <span className="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                      <Star className="w-4 h-4" />
+                      Mais Popular
+                    </span>
+                  </div>
+                )}
+                
+                <div className="p-8">
+                  <div className="text-center mb-6">
+                    <div className="flex justify-center mb-4">
+                      {plan.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
+                    
+                    <div className="mb-6">
+                      <span className="text-4xl font-bold text-gray-900">R$ {plan.price.toFixed(2)}</span>
+                      <span className="text-gray-600">/mês</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 mb-8">
+                    {plan.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        <span className="text-gray-700 text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={handleLoginClick}
+                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
+                      plan.popular
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    }`}
+                  >
+                    Começar Agora
+                  </button>
                 </div>
-                <h3 className="font-semibold text-gray-900">{tech.name}</h3>
-                <p className="text-sm text-gray-600">{tech.desc}</p>
               </div>
             ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-gray-600 mb-4">
+              💳 Pagamento seguro via PIX • ⚡ Ativação instantânea • 🔄 Cancele quando quiser
+            </p>
+            <button
+              onClick={handleLoginClick}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Ver Todos os Recursos
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </section>

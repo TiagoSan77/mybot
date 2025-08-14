@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import WhatsAppService from '../services/whatsappService';
 import { Session, SessionWithStatus } from '../types/session';
 import { randomUUID } from 'crypto';
+import subscriptionService from '../services/subscriptionService';
 import '../middleware/auth'; // Para incluir a extensão do Request
 
 class SessionController {
@@ -52,6 +53,20 @@ class SessionController {
                 res.status(401).json({ 
                     error: 'Autenticação requerida',
                     message: 'Faça login para criar sessões'
+                });
+                return;
+            }
+
+            // Verificar limites de dispositivos
+            const deviceLimits = await subscriptionService.canUserCreateSession(user.uid);
+            
+            if (!deviceLimits.canCreate) {
+                res.status(403).json({ 
+                    error: 'Limite de dispositivos atingido',
+                    message: `Você atingiu o limite de ${deviceLimits.maxDevices} dispositivo(s). Atualmente você tem ${deviceLimits.currentCount} sessão(ões) ativa(s).`,
+                    currentCount: deviceLimits.currentCount,
+                    maxDevices: deviceLimits.maxDevices,
+                    needsSubscription: deviceLimits.maxDevices === 0
                 });
                 return;
             }

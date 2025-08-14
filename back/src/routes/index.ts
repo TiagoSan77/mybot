@@ -5,6 +5,7 @@ import authRoutes from './auth';
 import messageRoutes from './messageRoutes';
 import messageTemplateRoutes from './messageTemplateRoutes';
 import { scheduledMessageRoutes } from './scheduledMessageRoutes';
+import paymentRoutes from './paymentRoutes';
 
 const router = Router();
 
@@ -19,7 +20,8 @@ router.get('/', (req, res) => {
             qr: '/sessions/:id/qr',
             messages: '/messages',
             templates: '/templates',
-            scheduled: '/scheduled'
+            scheduled: '/scheduled',
+            payments: '/payments'
         },
         timestamp: new Date().toISOString()
     });
@@ -32,5 +34,6 @@ router.use('/sessions', qrRoutes);         // Rotas de QR Code
 router.use('/messages', messageRoutes);    // Rotas de mensagens
 router.use('/templates', messageTemplateRoutes); // Rotas de templates
 router.use('/scheduled', scheduledMessageRoutes); // Rotas de mensagens agendadas
+router.use('/payments', paymentRoutes);    // Rotas de pagamentos
 
 export default router;

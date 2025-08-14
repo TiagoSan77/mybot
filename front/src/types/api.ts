@@ -33,6 +33,79 @@ export interface CreateSessionResponse {
   status: string;
 }
 
+// === PAGAMENTOS ===
+
+export interface Plan {
+  id: string;
+  name: string;
+  devices: number;
+  price: number;
+  description: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePaymentRequest {
+  planId: string;
+  months: number;
+}
+
+export interface CreatePaymentResponse {
+  paymentId: string;
+  mercadoPagoId: string;
+  pixCode: string;
+  pixQrCode: string;
+  amount: number;
+  expiresAt: string;
+  plan: {
+    name: string;
+    devices: number;
+    months: number;
+  };
+}
+
+export interface PaymentStatus {
+  id: string;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'expired';
+  amount: number;
+  pixCode: string;
+  pixQrCode: string;
+  expiresAt: string;
+  approvedAt?: string;
+  plan: Plan;
+  months: number;
+}
+
+export interface Subscription {
+  id: string;
+  planId: string;
+  devices: number;
+  status: 'active' | 'inactive' | 'expired' | 'cancelled';
+  startDate: string;
+  endDate: string;
+  autoRenew: boolean;
+}
+
+export interface UserSubscription {
+  subscription: Subscription | null;
+  deviceLimits: {
+    canCreate: boolean;
+    currentCount: number;
+    maxDevices: number;
+  };
+}
+
+export interface PaymentHistory {
+  _id: string;
+  planId: Plan;
+  months: number;
+  amount: number;
+  status: string;
+  createdAt: string;
+  approvedAt?: string;
+}
+
 // === MENSAGENS ===
 
 export interface SendMessageRequest {

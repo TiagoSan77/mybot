@@ -9,10 +9,11 @@ import CreateSessionModal from "./ui/CreateSessionModal";
 import QRCodeModal from "./ui/QRCodeModal";
 import SendMessageModal from "./ui/SendMessageModal";
 import MessageScheduler from "./MessageScheduler";
+import PaymentSystem from "./PaymentSystem";
 import type { Session, SendMessageResponse } from '../types/api';
 
 export default function Dashboard() {
-    const [activeTab, setActiveTab] = useState<'sessions' | 'scheduler'>('sessions');
+    const [activeTab, setActiveTab] = useState<'sessions' | 'scheduler' | 'payments'>('sessions');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isSendMessageModalOpen, setIsSendMessageModalOpen] = useState(false);
@@ -136,7 +137,9 @@ export default function Dashboard() {
                             className="flex items-center justify-between w-full p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
                         >
                             <span className="font-medium text-gray-900">
-                                {activeTab === 'sessions' ? '📱 Sessões WhatsApp' : '📅 Agendador de Mensagens'}
+                                {activeTab === 'sessions' ? '📱 Sessões WhatsApp' : 
+                                 activeTab === 'scheduler' ? '📅 Agendador de Mensagens' : 
+                                 '💳 Pagamentos'}
                             </span>
                             {isMobileMenuOpen ? (
                                 <X className="w-5 h-5 text-gray-500" />
@@ -193,6 +196,20 @@ export default function Dashboard() {
                                     >
                                         <span className="text-lg">📅</span>
                                         <span className="font-medium">Agendador de Mensagens</span>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setActiveTab('payments');
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        className={`w-full text-left p-3 flex items-center space-x-3 ${
+                                            activeTab === 'payments'
+                                                ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-500'
+                                                : 'text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <span className="text-lg">💳</span>
+                                        <span className="font-medium">Pagamentos</span>
                                     </button>
                                 </div>
 
@@ -278,6 +295,16 @@ export default function Dashboard() {
                             >
                                 📅 Agendador de Mensagens
                             </button>
+                            <button
+                                onClick={() => setActiveTab('payments')}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                                    activeTab === 'payments'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                💳 Pagamentos
+                            </button>
                         </nav>
                     </div>
                 </div>
@@ -302,12 +329,17 @@ export default function Dashboard() {
                 {activeTab === 'scheduler' && (
                     <MessageScheduler />
                 )}
+
+                {activeTab === 'payments' && (
+                    <PaymentSystem />
+                )}
             </main>
 
             <CreateSessionModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSessionCreated={handleSessionCreated}
+                onUpgradeNeeded={() => setActiveTab('payments')}
             />
 
             <QRCodeModal

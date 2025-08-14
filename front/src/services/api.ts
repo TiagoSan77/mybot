@@ -13,7 +13,13 @@ import type {
   TemplatesResponse,
   TemplateResponse,
   UpdateTemplateRequest,
-  CategoriesResponse
+  CategoriesResponse,
+  Plan,
+  CreatePaymentRequest,
+  CreatePaymentResponse,
+  PaymentStatus,
+  UserSubscription,
+  PaymentHistory
 } from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -252,6 +258,38 @@ export const whatsappAPI = {
   // Obter status do agendador
   async getSchedulerStatus(): Promise<any> {
     const response = await api.get('/scheduled/scheduler/status');
+    return response.data;
+  },
+
+  // === MÉTODOS DE PAGAMENTO ===
+
+  // Obter planos disponíveis
+  async getPlans(): Promise<Plan[]> {
+    const response = await api.get('/payments/plans');
+    return response.data;
+  },
+
+  // Criar pagamento PIX
+  async createPayment(data: CreatePaymentRequest): Promise<CreatePaymentResponse> {
+    const response = await api.post('/payments/create', data);
+    return response.data;
+  },
+
+  // Obter status do pagamento
+  async getPaymentStatus(paymentId: string): Promise<PaymentStatus> {
+    const response = await api.get(`/payments/payment/${paymentId}/status`);
+    return response.data;
+  },
+
+  // Obter assinatura do usuário
+  async getUserSubscription(): Promise<UserSubscription> {
+    const response = await api.get('/payments/subscription');
+    return response.data;
+  },
+
+  // Obter histórico de pagamentos
+  async getPaymentHistory(): Promise<PaymentHistory[]> {
+    const response = await api.get('/payments/history');
     return response.data;
   }
 };
