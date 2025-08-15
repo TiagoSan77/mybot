@@ -44,7 +44,7 @@ class App {
     }
 
     private initializeRoutes(): void {
-        this.app.use('/', routes);
+        this.app.use('/api', routes);
     }
 
     public async start(): Promise<void> {
