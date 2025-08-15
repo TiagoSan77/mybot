@@ -322,19 +322,6 @@ export default function Landing() {
               </div>
             ))}
           </div>
-
-          <div className="text-center mt-12">
-            <p className="text-gray-600 mb-4">
-              💳 Pagamento seguro via PIX • ⚡ Ativação instantânea • 🔄 Cancele quando quiser
-            </p>
-            <button
-              onClick={handleLoginClick}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Ver Todos os Recursos
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       </section>
 
